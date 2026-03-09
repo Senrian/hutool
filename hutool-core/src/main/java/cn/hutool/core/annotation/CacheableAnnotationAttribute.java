@@ -17,8 +17,8 @@ public class CacheableAnnotationAttribute implements AnnotationAttribute {
 	private volatile boolean valueInvoked;
 	private volatile Object value;
 
-	private boolean defaultValueInvoked;
-	private Object defaultValue;
+	private volatile boolean defaultValueInvoked;
+	private volatile Object defaultValue;
 
 	private final Annotation annotation;
 	private final Method attribute;
@@ -58,8 +58,12 @@ public class CacheableAnnotationAttribute implements AnnotationAttribute {
 	@Override
 	public boolean isValueEquivalentToDefaultValue() {
 		if (!defaultValueInvoked) {
-			defaultValue = attribute.getDefaultValue();
-			defaultValueInvoked = true;
+			synchronized (this) {
+				if (!defaultValueInvoked) {
+					defaultValueInvoked = true;
+					defaultValue = attribute.getDefaultValue();
+				}
+			}
 		}
 		return ObjectUtil.equals(getValue(), defaultValue);
 	}
