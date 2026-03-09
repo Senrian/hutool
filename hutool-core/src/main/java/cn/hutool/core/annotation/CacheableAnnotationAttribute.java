@@ -58,8 +58,12 @@ public class CacheableAnnotationAttribute implements AnnotationAttribute {
 	@Override
 	public boolean isValueEquivalentToDefaultValue() {
 		if (!defaultValueInvoked) {
-			defaultValue = attribute.getDefaultValue();
-			defaultValueInvoked = true;
+			synchronized (this) {
+				if (!defaultValueInvoked) {
+					defaultValueInvoked = true;
+					defaultValue = attribute.getDefaultValue();
+				}
+			}
 		}
 		return ObjectUtil.equals(getValue(), defaultValue);
 	}
