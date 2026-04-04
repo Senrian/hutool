@@ -37,7 +37,9 @@ public class AIServiceFactory {
 
 	// 加载所有 AIModelProvider 实现类
 	static {
-		final ServiceLoader<AIServiceProvider> loader = ServiceLoaderUtil.load(AIServiceProvider.class);
+		// 使用 AIServiceProvider.class.getClassLoader() 而不是 context classloader
+		// 因为在 Spring/线程池等环境中，context classloader 可能无法正确加载 SPI 实现
+		final ServiceLoader<AIServiceProvider> loader = ServiceLoaderUtil.load(AIServiceProvider.class, AIServiceProvider.class.getClassLoader());
 		for (final AIServiceProvider provider : loader) {
 			providers.put(provider.getServiceName().toLowerCase(), provider);
 		}
